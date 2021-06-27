@@ -22,6 +22,7 @@ export default class Header extends React.PureComponent {
       scrollOffset: new Animated.Value(0),
       left: 0,
       bottom: 0,
+      scrollOffset_Y: 0,
     };
   }
 
@@ -30,6 +31,7 @@ export default class Header extends React.PureComponent {
       return;
     }
     this.state.scrollOffset.setValue(e.nativeEvent.contentOffset.y);
+    this.setState({scrollOffset_Y: e.nativeEvent.contentOffset.y})
   };
 
   onBackLayout = (e) => {
@@ -40,6 +42,7 @@ export default class Header extends React.PureComponent {
 
   _getFontSize = () => {
     const { scrollOffset } = this.state;
+    console.log('scrollOffset', scrollOffset);
     const backFontSize = this.props.backTextStyle.fontSize || Header.defaultProps.backTextStyle.fontSize;
     const titleFontSize = this.props.titleStyle.fontSize || Header.defaultProps.titleStyle.fontSize;
     return scrollOffset.interpolate({
@@ -61,6 +64,7 @@ export default class Header extends React.PureComponent {
 
   _getHeight = () => {
     const { scrollOffset } = this.state;
+    console.log('this.headerHeight', this.headerHeight);
     return scrollOffset.interpolate({
       inputRange: [0, this.headerHeight - toolbarHeight],
       outputRange: [this.headerHeight, toolbarHeight],
@@ -125,7 +129,6 @@ export default class Header extends React.PureComponent {
     const fontSize = this._getFontSize();
     const imageOpacity = this._getImageOpacity();
     const headerStyle = this.props.noBorder ? undefined : { borderBottomWidth: 1, borderColor: '#a7a6ab'}
-
     return (
         <Animated.View
           style={[
@@ -141,7 +144,7 @@ export default class Header extends React.PureComponent {
             source={imageSource}
             resizeMode='cover'
           />}
-          <View style={styles.toolbarContainer}>
+          <View style={[styles.toolbarContainer, this.state.scrollOffset_Y > 70 ? styles.shadow : {}]}>
             <View style={styles.statusBar} />
             <View style={styles.toolbar}>
               {this.props.renderLeft && this.props.renderLeft()}
@@ -157,6 +160,7 @@ export default class Header extends React.PureComponent {
             left: left,
             bottom: bottom,
             fontSize,
+            elevation: 5
           }]}>
             {this.props.title}
           </Animated.Text>
@@ -167,7 +171,7 @@ export default class Header extends React.PureComponent {
 
 const styles = StyleSheet.create({
   toolbarContainer: {
-    height: toolbarHeight
+    height: 72
   },
   statusBar: {
     height: topInset + paddingTop
@@ -188,6 +192,17 @@ const styles = StyleSheet.create({
   },
   flexView: {
     flex: 1,
+  },
+  shadow: {
+    backgroundColor: 'white',
+    borderColor: '#ddd',
+    borderBottomWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    borderRadius: 4,
   },
 });
 
